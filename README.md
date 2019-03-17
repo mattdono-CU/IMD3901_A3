@@ -15,5 +15,3 @@ Both players have access to a button that will change the colour of their room t
 While both players are pressing their buttons at the same time, both rooms will turn white to reveal all coloured blocks and pads.
 Players must race against each other or work together to find and place all of their blocks on the correct pads by swapping room colours.
 Either way, there can only be one winner.
-
-Who will escape and who will remain chromatose?
