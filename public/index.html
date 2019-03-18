@@ -8,8 +8,9 @@
   </head>
   <body>
     <a-scene  physics="debug: true;">
+      <!-- Assets -->
       <a-assets>
-        <!-- Walls -->
+        <!-- Shapes -->
         <a-mixin  id="mWall"
                   geometry="primitive: box;
                             height: 5;
@@ -17,18 +18,47 @@
                             depth: 1;"
                   static-body
         ></a-mixin>
+        <a-mixin  id="mBlock"
+                  geometry="primitive: box;
+                            height: 1;
+                            width: 1;
+                            depth: 1;"
+                  dynamic-body="mass: 10;"
+                  position="0 0.5 0"
+        ></a-mixin>
+        <a-mixin  id="mPad"
+                  geometry="primitive: cylinder;
+                            height: 0.08;
+                            radius: 0.8"
+                  static-body
+                  position="0 0.04 0"
+        ></a-mixin>
 
-        <!-- Colour -->
+        <!-- Colours -->
         <a-mixin  id="mColour"
                   material="color: #39BB82"
         ></a-mixin>
-      </a-assets>
+        <a-mixin  id="mGreen"
+                  material="color: #2ecc71"
+        ></a-mixin>
+        <a-mixin  id="mYellow"
+                  material="color: #f1c40f"
+        ></a-mixin>
+        <a-mixin  id="mBlue"
+                  material="color: #3498db"
+        ></a-mixin>
+        <a-mixin  id="mPurple"
+                  material="color: #9b59b6"
+        ></a-mixin>
 
+      </a-assets>
+      <!-- End of Assets -->
 
       <!-- Player -->
       <a-entity id="camera-rig"
                 movement-controls
-                kinematic-body
+                kinematic-body="mass: 20;
+                                radius: 1"
       >
         <a-entity id="camera"
                   camera
@@ -42,40 +72,84 @@
         </a-entity>
       </a-entity>
 
-      <!-- Animated Object -->
-      <a-box  class="clickable"
-              position="0 1.6 0"
-              animation="startEvents: mousedown;
-                         property: position;
-                         from: 0 1.6 0;
-                         to: 0 1.6 1;
-                         dur: 100;
-                         dir: alternate;
-                         easing: easeInOutCirc"
-        ></a-box>
-
       <!-- Ground -->
-      <a-grid static-body></a-grid>
+      <a-entity id="floor"
+                static-body
+                mixin="mColour"
+                geometry="primitive: box;
+                          height: 0.1;
+                          width: 16;
+                          depth: 16;"
+                position="0 -0.05"
+      ></a-entity>
 
       <!-- Walls -->
       <a-entity id="wall-back"
                 mixin="mColour mWall"
-                position="0 2.5 -7.5"
+                position="0 2.5 -8"
       ></a-entity>
       <a-entity id="wall-front"
                 mixin="mColour mWall"
-                position="0 2.5 7.5"
+                position="0 2.5 8"
       ></a-entity>
       <a-entity id="wall-left"
                 mixin="mColour mWall"
-                position="-7.5 2.5 0"
+                position="-8 2.5 0"
                 rotation="0 90 0"
       ></a-entity>
       <a-entity id="wall-right"
                 mixin="mColour mWall"
-                position="7.5 2.5 0"
+                position="8 2.5 0"
                 rotation="0 90 0"
       ></a-entity>
+
+      <!-- Chroma Shapes -->
+      <!-- Blocks -->
+      <a-entity id="block-green"
+                mixin="mGreen mBlock"
+                position="-1 0.5 3"
+      ></a-entity>
+
+      <!-- Pads -->
+      <a-entity id="pad-green"
+                mixin="mGreen mPad"
+                position="1 0.04 -3"
+      ></a-entity>
+      <!-- End of Chroma Shapes -->
+
+      <!-- Button Console -->
+      <a-entity id="button-rig">
+          <a-entity id="button"
+                    class="clickable"
+                    static-body
+                    geometry="primitive: cylinder;
+                              radius: 0.1;
+                              height: 0.1;"
+                    material="color: #e74c3c;"
+                    position="0 1.04 0"
+                    animation__for="startEvents: mousedown;
+                                    property: position;
+                                    from: 0 1.04 0;
+                                    to: 0 0.96 0;
+                                    dur: 50;
+                                    easing: easeInOutSine;"
+                    animation__back="startEvents: mouseup;
+                                     property: position;
+                                     from: 0 0.96 0;
+                                     to: 0 1.04 0;
+                                     dur: 500;
+                                     easing: easeInOutSine;"
+          ></a-entity>
+          <a-entity  id="mPedestal"
+                    static-body
+                    geometry="primitive: box;
+                              height: 1;
+                              width: 0.4;
+                              depth: 0.4;"
+                    material="color: #bdc3c7;"
+                    position="0 0.5 0"
+          ></a-entity>
+      </a-entity>
 
       <!-- Lighting -->
       <a-light  type="ambient"
