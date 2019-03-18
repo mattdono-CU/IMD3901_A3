@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>Chromatose</title>
@@ -25,16 +26,33 @@
 
 
       <!-- Player -->
-      <a-entity id="rig"
+      <a-entity id="camera-rig"
                 movement-controls
                 kinematic-body
       >
         <a-entity id="camera"
                   camera
+                  look-controls
                   position="0 1.6 0"
-                  look-controls="pointerLockEnabled: true"
-        ></a-entity>
+        >
+          <a-entity cursor="fuse: false;
+                            rayOrigin: mouse;"
+                    raycaster="objects: .clickable"
+          ></a-entity>
+        </a-entity>
       </a-entity>
+
+      <!-- Animated Object -->
+      <a-box  class="clickable"
+              position="0 1.6 0"
+              animation="startEvents: mousedown;
+                         property: position;
+                         from: 0 1.6 0;
+                         to: 0 1.6 1;
+                         dur: 100;
+                         dir: alternate;
+                         easing: easeInOutCirc"
+        ></a-box>
 
       <!-- Ground -->
       <a-grid static-body></a-grid>
@@ -64,6 +82,7 @@
                 color="#bbb"
                 intensity="1.2"
       ></a-light>
+
     </a-scene>
   </body>
 </html>
