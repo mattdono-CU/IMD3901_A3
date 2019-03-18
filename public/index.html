@@ -1,0 +1,108 @@
+<html>
+  <head>
+    <title>Chromatose</title>
+    <script src="js/aframe-extras.js"></script>
+    <script src="js/eventManager-component.js"></script>
+  </head>
+  <body>
+    <a-scene  physics="debug: true;">
+      <!-- Assets -->
+      <a-assets>
+        <a-mixin  id="mWall"
+                  class="wall"
+                  static-body
+                  geometry="primitve: box;
+                            height: 5;
+                            width: 15;
+                            depth: 1;"
+                  material="color: #39BB82;"
+        ></a-mixin>
+
+        <a-mixin  id="mButton"
+                  class="clickable"
+                  static-body
+                  geometry="primitive: cylinder;
+                            radius: 0.1;
+                            height: 0.1;"
+                  material="color: #e74c3c;"
+                  position="0 0.8 0"
+        ></a-mixin>
+        
+        <a-mixin  id="mPedestal"
+                  static-body
+                  geometry="primitive: box;
+                            height: 0.8;
+                            width: 0.4;
+                            depth: 0.4;"
+                  material="color: #bdc3c7;"
+                  position="0 0.4 0"
+        ></a-mixin>
+      </a-assets>
+
+      <!-- Player -->
+      <a-entity camera="userHeight: 1.6"
+                universal-controls
+                kinematic-body
+      >
+        <a-entity raycaster="objects: .clickable;"
+                  cursor="fuse: false;
+                          rayOrigin: mouse;"
+                  position="0 0 -1"
+                  geometry="primitive: ring;
+                            radiusInner: 0.01;
+                            radiusOuter: 0.02;"
+                  material="color: #f0f3bd;
+                            shader: flat">
+        ></a-entity>
+      </a-entity>
+
+      <!-- Ground -->
+      <a-grid static-body></a-grid>
+
+      <!-- Walls -->
+      <a-box  id="wall-front"
+              mixin="mWall"
+              position="0 2.5 -7.5"
+      ></a-box>
+      <a-box  id="wall-back"
+              mixin="mWall"
+              position="0 2.5 7.5"
+      ></a-box>
+      <a-box  id="wall-left"
+              mixin="mWall"
+              position="-7.5 2.5 0"
+              rotation="0 90 0"
+      ></a-box>
+      <a-box  id="wall-right"
+              mixin="mWall"
+              position="7.5 2.5 0"
+              rotation="0 90 0"
+      ></a-box>
+
+      <!-- Lighting -->
+      <a-light  type="ambient"
+                color="#bbb"
+      ></a-light>
+
+      <!-- Colour Shift Button -->
+      <a-entity id="buttonConsole"
+                position ="0 0 -1.5">
+        <a-entity mixin="mButton">
+          <a-animation  attribute="position"
+                        from="0 0.8 0" to="0 0.76 0"
+                        dur="150"
+                        direction="alternate"
+                        easing="ease-circ"
+                        begin="mousedown"
+                        repeat="1"
+          ></a-animation>
+        </a-entity>
+        <a-entity mixin="mPedestal"></a-entity>
+      </a-entity>
+
+      <!-- Temoporary -->
+      <a-light color="#ccc" position="0 30 0" distance="100" intensity="0.4" type="point"></a-light>
+      <a-light color="#ccc" position="3 10 -10" distance="50" intensity="0.4" type="point"></a-light>
+    </a-scene>
+  </body>
+</html>
