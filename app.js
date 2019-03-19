@@ -15,6 +15,9 @@ app.use(express.static(__dirname + '/public'));
 app.get('/', function(req, res) {
     res.sendFile(__dirname + 'public/index.html');
 });
+// app.get('/', function(req, res) {
+//     res.sendFile(__dirname + 'public/roomB.html');
+// });
 
 //start server
 server.listen(LISTEN_PORT);
