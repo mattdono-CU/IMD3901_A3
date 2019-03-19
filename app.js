@@ -28,7 +28,11 @@ socketIO.on('connection', function(socket) {
     });
 
     socket.on('buttonApressed', function() {
-        console.log('[Colour Shift Registered]');
+        console.log('[Button A Registered]');
+        socketIO.sockets.emit('colourshift');
+    });
+    socket.on('buttonBpressed', function() {
+        console.log('[Button B Registered]');
         socketIO.sockets.emit('colourshift');
     });
 });

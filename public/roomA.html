@@ -213,7 +213,9 @@
     </a-scene>
     <!-- JavaScript Code -->
     <script>
-      let socket  = io();
+      let socket      = io();
+      let buttonA
+
       //Objects
       let button  = document.querySelector('#button');
       let walls   = document.querySelectorAll('.chroma-wall');
@@ -239,6 +241,12 @@
         
         for (i = 0; i < walls.length; i++) {
           walls[i].setAttribute('material', {color: newCol});
+        }
+      });
+
+      socket.on('reveal', function() {
+        for (i = 0; i < walls.length; i++) {
+          walls[i].setAttribute('material', {color: colours[coloures.length - 1]});
         }
       });
     </script>
