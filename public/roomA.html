@@ -1,11 +1,12 @@
 <html>
   <head>
     <title>Chromatose</title>
-    <script src="js/aframe-v0.9.0.js"></script>
+    <script src="js/aframe-v0.8.2.min.js"></script>
     <script src="js/aframe-extras.js"></script>
     <script src="js/aframe-physics-system.js"></script>
-    <script src="js/chromatose-manager-component.js"></script>
-    <script src="js/chroma-block-component.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- <script src="js/chromatose-manager-component.js"></script>
+    <script src="js/chroma-block-component.js"></script> -->
   </head>
   <body>
     <a-scene  physics="debug: false;
@@ -21,7 +22,6 @@
                   static-body
         ></a-mixin>
         <a-mixin  id="mBlock"
-                  chroma-block
                   geometry="primitive: box;
                             height: 0.9;
                             width: 0.9;
@@ -38,23 +38,25 @@
         ></a-mixin>
 
         <!-- Colours -->
-        <a-mixin  id="mColour"
-                  material="color: #2ecc71"
-        ></a-mixin>
-        <a-mixin  id="mWhite"
-                  material="color: #ecf0f1"
-        ></a-mixin>
         <a-mixin  id="mGreen"
+                  class="chroma-colour"
                   material="color: #2ecc71"
         ></a-mixin>
         <a-mixin  id="mYellow"
+                  class="chroma-colour"
                   material="color: #f1c40f"
         ></a-mixin>
         <a-mixin  id="mBlue"
-                  material="color: #3498db"
+                  class="chroma-colour"
+                  material="color: #9b59b6"
         ></a-mixin>
         <a-mixin  id="mPurple"
-                  material="color: #9b59b6"
+                  class="chroma-colour"
+                  material="color: #3498db"
+        ></a-mixin>
+        <a-mixin  id="mWhite"
+                  class="chroma-colour"
+                  material="color: #ecf0f1"
         ></a-mixin>
 
       </a-assets>
@@ -84,8 +86,9 @@
 
       <!-- Ground -->
       <a-entity id="floor"
+                class="chroma-wall"
                 static-body
-                mixin="mColour"
+                mixin="mGreen"
                 geometry="primitive: box;
                           height: 0.1;
                           width: 16;
@@ -95,20 +98,24 @@
 
       <!-- Walls -->
       <a-entity id="wall-back"
-                mixin="mColour mWall"
+                class="chroma-wall"
+                mixin="mGreen mWall"
                 position="0 2.5 -8"
       ></a-entity>
       <a-entity id="wall-front"
-                mixin="mColour mWall"
+                class="chroma-wall"
+                mixin="mGreen mWall"
                 position="0 2.5 8"
       ></a-entity>
       <a-entity id="wall-left"
-                mixin="mColour mWall"
+                class="chroma-wall"
+                mixin="mGreen mWall"
                 position="-8 2.5 0"
                 rotation="0 90 0"
       ></a-entity>
       <a-entity id="wall-right"
-                mixin="mColour mWall"
+                class="chroma-wall"
+                mixin="mGreen mWall"
                 position="8 2.5 0"
                 rotation="0 90 0"
       ></a-entity>
@@ -116,22 +123,22 @@
       <!-- Chroma Shapes -->
       <!-- Blocks -->
       <a-entity id="block-green"
-                class="clickable"
+                class="clickable chroma-block"
                 mixin="mGreen mBlock"
                 position="-3 0.45 6"
       ></a-entity>
       <a-entity id="block-yellow"
-                class="clickable"
+                class="clickable chroma-block"
                 mixin="mYellow mBlock"
                 position="-4 0.45 2"
       ></a-entity>
       <a-entity id="block-blue"
-                class="clickable"
+                class="clickable chroma-block"
                 mixin="mBlue mBlock"
                 position="4 0.45 4"
       ></a-entity>
       <a-entity id="block-purple"
-                class="clickable"
+                class="clickable chroma-block"
                 mixin="mPurple mBlock"
                 position="4 0.45 -5"
       ></a-entity>
@@ -165,19 +172,22 @@
                               height: 0.1;"
                     material="color: #e74c3c;"
                     position="0 1.04 0"
-                    animation__for="startEvents: mousedown;
-                                    property: position;
-                                    from: 0 1.04 0;
-                                    to: 0 0.96 0;
-                                    dur: 50;
-                                    easing: easeInOutSine;"
-                    animation__back="startEvents: mouseup;
-                                     property: position;
-                                     from: 0 0.96 0;
-                                     to: 0 1.04 0;
-                                     dur: 500;
-                                     easing: easeInOutSine;"
-          ></a-entity>
+          >
+            <a-animation  attribute="position"
+                          from="0 1.04 0"
+                          to="0 0.96 0"
+                          dur="250"
+                          begin="mousedown"
+                          easing="ease-in-out-sine"
+            ></a-animation>
+            <a-animation  attribute="position"
+                          from="0 0.96 0"
+                          to="0 1.04 0"
+                          dur="250"
+                          begin="mouseup"
+                          easing="ease-in-out-sine"
+            ></a-animation>
+          </a-entity>
           <a-entity id="mPedestal"
                     static-body
                     geometry="primitive: box;
@@ -195,11 +205,42 @@
                 intensity="1.2"
       ></a-light>
 
-      <!-- Event Handler -->
+      <!-- Event Handler
       <a-entity id="handler"
                 chromatose-manager
-      ></a-entity>
+      ></a-entity> -->
 
     </a-scene>
+    <!-- JavaScript Code -->
+    <script>
+      let socket  = io();
+      //Objects
+      let button  = document.querySelector('#button');
+      let walls   = document.querySelectorAll('.chroma-wall');
+      //console.log(walls);
+
+      //Colours
+      let colours = [document.querySelector('#mGreen').getAttribute('material').color, document.querySelector('#mYellow').getAttribute('material').color, document.querySelector('#mBlue').getAttribute('material').color, document.querySelector('#mPurple').getAttribute('material').color, document.querySelector('#mWhite').getAttribute('material').color];
+      //console.log(colours);
+      let curCol  = colours[0];
+      let newCol  = colours[0];
+
+      button.addEventListener('mousedown', function() {
+        socket.emit('buttonApressed');
+      });
+
+      socket.on('colourshift', function() {
+        curCol = newCol;
+        let index = Math.floor(Math.random() * 4);
+            while (colours[index] === curCol){
+                index = Math.floor(Math.random() * 4);
+            }
+        newCol = colours[index];
+        
+        for (i = 0; i < walls.length; i++) {
+          walls[i].setAttribute('material', {color: newCol});
+        }
+      });
+    </script>
   </body>
 </html>

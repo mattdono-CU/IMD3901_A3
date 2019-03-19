@@ -6,22 +6,20 @@ AFRAME.registerComponent('chroma-block', {
         Context_AF.scene    = document.querySelector('a-scene');
         Context_AF.cursor   = document.querySelector('#cursor');
 
-        //Pick up
-        Context_AF.el.addEventListener('click', function(event) {
-            if (!event.target.is('grabbed')) {
-                event.target.setAttribute('position', {x: Context_AF.cursor.getAttribute('position').x,
-                                                       y: Context_AF.cursor.getAttribute('position').y,
-                                                       z: Context_AF.cursor.getAttribute('position').z});
-                event.target.addState('grabbed');
-                event.target.setAttribute('constraint', {type: 'lock', target:'#cursor', collideConnected: false, });
-            } else if (event.target.is('grabbed')) {
-                event.target.removeState('grabbed');
-                event.target.removeAttribute('constraint');
-            }
+        //On Click
+        Context_AF.el.addEventListener('click', function() {
+            console.log("[pressed]");
+            Context_AF.el.setAttribute('position', {x: 0, y: 0, z: -2});
+            Context_AF.el.flushToDOM();
+            Context_AF.cursor.appendChild(Context_AF.el);
         });
-        // //Released
-        // Context_AF.el.addEventListener('mouseup', function(event) {
-
-        // });
+        //Released
+        Context_AF.el.addEventListener('click', function(event) {
+            console.log("[mouse released]");
+            let tempPos = Context_AF.el.object3D.getWorldPosition();
+            Context_AF.el.setAttribute('position', {x: tempPos.x, y: tempPos.y, z: tempPos.z});
+            Context_AF.el.flushToDOM();
+            Context_AF.scene.appendChild(Context_AF.el);
+        });
     },
 });
