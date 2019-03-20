@@ -1,22 +1,38 @@
 <html>
   <head>
-    <title>Chromatose</title>
+    <title>Chromatose | Room A</title>
     <script src="js/aframe-v0.8.2.min.js"></script>
     <script src="js/aframe-extras.js"></script>
     <script src="js/aframe-physics-system.js"></script>
     <script src="js/aframe-physics-extras.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <!-- <script src="js/chromatose-manager-component.js"></script> -->
     <script src="js/chroma-block-component.js"></script>
   </head>
   <body>
+    <!--
+    * * * * * * * * * * * * * * *
+      A - F R A M E   S C E N E
+    * * * * * * * * * * * * * * *
+    -->
     <a-scene  physics="debug: false;
                        gravity: -9.8;
                        maxInterval: 0.02;
-                       iterations: 20;
+                       iterations: 10;
                        restitution: 0.1;">
       <!-- Assets -->
       <a-assets>
+        <!-- Music sourced from: https://www.youtube.com/audiolibrary/music?ar=2 -->
+        <audio id="bgMusic"
+               src="/assets/sounds/Root.mp3"
+        ></audio>
+        <!-- Sound Effects below sourced from: http://noproblo.dayjo.org/ZeldaSounds/ -->
+        <audio id="block-hit" 
+               src="/assets/sounds/OOT_Steps_Wood5.wav"
+        ></audio>
+        <audio id="button-local"
+               src="/assets/sounds/TP_Portals_On.wav"
+        ></audio>
+        
         <!-- Shapes -->
         <a-mixin  id="mWall"
                   static-body
@@ -27,6 +43,10 @@
         ></a-mixin>
         <a-mixin  id="mBlock"
                   chroma-block
+                  sound="src: #block-hit;
+                         autoplay: true;
+                         volume: 10;
+                         on: mousedown;"
                   dynamic-body="mass: 20;"
                   geometry="primitive: box;
                             height: 0.9;
@@ -44,28 +64,31 @@
 
         <!-- Colours -->
         <a-mixin  id="mGreen"
-                  class="chroma-colour"
                   material="color: #2ecc71;"
         ></a-mixin>
         <a-mixin  id="mYellow"
-                  class="chroma-colour"
                   material="color: #f1c40f;"
         ></a-mixin>
         <a-mixin  id="mBlue"
-                  class="chroma-colour"
                   material="color: #3498db;"
         ></a-mixin>
         <a-mixin  id="mPurple"
-                  class="chroma-colour"
                   material="color: #8e44ad;"
         ></a-mixin>
         <a-mixin  id="mWhite"
-                  class="chroma-colour"
                   material="color: #ecf0f1;"
         ></a-mixin>
 
       </a-assets>
       <!-- End of Assets -->
+
+       <!-- Background Music -->
+      <a-entity sound="src: #bgMusic;
+                       autoplay: false;
+                       loop: true;
+                       positional: false;
+                       volume: 0.3;"
+      ></a-entity>
 
       <!-- Player -->
       <a-entity id="camera-rig"
@@ -116,7 +139,6 @@
       <a-entity id="floor"
                 class="chroma-wall"
                 static-body
-                mixin="mGreen"
                 geometry="primitive: box;
                           height: 0.1;
                           width: 16;
@@ -127,7 +149,6 @@
       <a-entity id="floor"
                 class="chroma-wall"
                 static-body
-                mixin="mGreen"
                 geometry="primitive: box;
                           height: 0.1;
                           width: 16;
@@ -138,23 +159,23 @@
       <!-- Walls -->
       <a-entity id="wall-back"
                 class="chroma-wall"
-                mixin="mGreen mWall"
+                mixin="mWall"
                 position="0 2.5 -8"
       ></a-entity>
       <a-entity id="wall-front"
                 class="chroma-wall"
-                mixin="mGreen mWall"
+                mixin="mWall"
                 position="0 2.5 8"
       ></a-entity>
       <a-entity id="wall-left"
                 class="chroma-wall"
-                mixin="mGreen mWall"
+                mixin="mWall"
                 position="-8 2.5 0"
                 rotation="0 90 0"
       ></a-entity>
       <a-entity id="wall-right"
                 class="chroma-wall"
-                mixin="mGreen mWall"
+                mixin="mWall"
                 position="8 2.5 0"
                 rotation="0 90 0"
       ></a-entity>
@@ -210,6 +231,10 @@
           <a-entity id="button"
                     class="clickable"
                     static-body
+                    sound="src: #button-local;
+                           autoplay: false;
+                           volume: 1;
+                           on: mousedown;"
                     geometry="primitive: cylinder;
                               radius: 0.1;
                               height: 0.1;"
@@ -254,7 +279,11 @@
       ></a-entity> -->
 
     </a-scene>
-    <!-- JavaScript Code -->
+    <!--
+    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+      E V E N T   M A N A G E M E N T   &   S O C K E T I O   C O D E
+    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    -->
     <script>
       let socket  = io();
       let index = Math.floor(Math.random() * 4);
@@ -264,11 +293,13 @@
       let cursor  = document.querySelector('#cursor');
       let walls   = document.querySelectorAll('.chroma-wall');
       let blocks  = document.querySelectorAll('.chroma-block');
-      //console.log(blocks);
 
       //Colours
-      let colours = [document.querySelector('#mGreen').getAttribute('material').color, document.querySelector('#mYellow').getAttribute('material').color, document.querySelector('#mBlue').getAttribute('material').color, document.querySelector('#mPurple').getAttribute('material').color, document.querySelector('#mWhite').getAttribute('material').color];
-      //console.log(colours);
+      let colours = [document.querySelector('#mGreen').getAttribute('material').color,    //Green
+                     document.querySelector('#mYellow').getAttribute('material').color,   //Yellow
+                     document.querySelector('#mBlue').getAttribute('material').color,     //Blue
+                     document.querySelector('#mPurple').getAttribute('material').color,   //Purple
+                     document.querySelector('#mWhite').getAttribute('material').color];   //White
       let curCol  = colours[index];
       let newCol  = colours[index];
 
@@ -278,16 +309,32 @@
       }
 
       //C L I E N T   E V E N T S
+      //Blocks
+      for (i = 0; i < blocks.length; i++) {
+        //match found between block and corresponding pad
+        blocks[i].addEventListener('stateadded', function(event) {
+          if (event.detail === 'matched') {
+            console.log(this.id + " is " + event.detail);
+            socket.emit('matchfound', "A", this.id);
+          }
+        });
+        //match lost between block and corresponding pad
+        blocks[i].addEventListener('stateremoved', function(event) {
+          if (event.detail === 'matched') {
+            console.log(this.id + " not " + event.detail);
+            socket.emit('matchlost', "A", this.id);
+          }
+        });
+      }
+
       //mousedown
       button.addEventListener('mousedown', function() {
-        socket.emit('buttonApressed');
+        socket.emit('buttonpressed', "A");
       });
       //mouseup
       button.addEventListener('mouseup', function() {
-        socket.emit('buttonAreleased');
+        socket.emit('buttonreleased', "A");
       });
-      //block + pad match
-      
 
       //S E R V E R   E V E N T S
       //colourshift (initiated by either client, roomA or roomB)
@@ -311,6 +358,13 @@
         curCol = colours[colours.length - 1];
         for (i = 0; i < walls.length; i++) {
           walls[i].setAttribute('material', {color: colours[colours.length - 1]});
+        }
+      });
+      socket.on('gameover', function(roomId) {
+        if (roomId === 'A') {
+          window.location.href = 'winner.html';
+        } else if (roomId === 'B') {
+          window.location.href = 'loser.html';
         }
       });
     </script>
