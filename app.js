@@ -19,21 +19,62 @@ app.get('/roomA', function(req, res) {
 //     res.sendFile(__dirname + 'public/roomB.html');
 // });
 
-//Socket.io Code
+//S O C K E T   C O D E
 socketIO.on('connection', function(socket) {
+    let buttonA = false;
+    let buttonB = false;
+    let reveal  = false;
+
     console.log('[' + socket.id + ' connected]')
 
     socket.on('disconnect', function() {
         console.log('[' + socket.id + ' disconnected]')
     });
 
+    //R O O M - A - E V E N T S
     socket.on('buttonApressed', function() {
-        console.log('[Button A Registered]');
-        socketIO.sockets.emit('colourshift');
+        buttonA = true;
+
+        if (buttonA && buttonB) {
+            console.log('[Reveal Registered-A]');
+            reveal = true;
+            socketIO.sockets.emit('reveal');
+        } else {
+            console.log('[ColourShft Registered]');
+            socketIO.sockets.emit('colourshift');
+        }
     });
+    socket.on('buttonAreleased', function() {
+        buttonA = false;
+        console.log('buttonA: ' + buttonA);
+
+        if (reveal) {
+            reveal = false;
+            socketIO.sockets.emit('colourshift');
+        }
+    });
+
+    //R O O M - B - E V E N T S
     socket.on('buttonBpressed', function() {
-        console.log('[Button B Registered]');
-        socketIO.sockets.emit('colourshift');
+        buttonB = true;
+
+        if (buttonB && buttonA) {
+            console.log('[Reveal Registered-B]');
+            reveal = true;
+            socketIO.sockets.emit('reveal');
+        } else {
+            console.log('[ColourShft Registered]');
+            socketIO.sockets.emit('colourshift');
+        }
+    });
+    socket.on('buttonBreleased', function() {
+        buttonB = false;
+        console.log('buttonB: ' + buttonB);
+
+        if (reveal) {
+            reveal = false;
+            socketIO.sockets.emit('colourshift');
+        }
     });
 });
 

@@ -4,59 +4,64 @@
     <script src="js/aframe-v0.8.2.min.js"></script>
     <script src="js/aframe-extras.js"></script>
     <script src="js/aframe-physics-system.js"></script>
+    <script src="js/aframe-physics-extras.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <!-- <script src="js/chromatose-manager-component.js"></script>
-    <script src="js/chroma-block-component.js"></script> -->
+    <!-- <script src="js/chromatose-manager-component.js"></script> -->
+    <script src="js/chroma-block-component.js"></script>
   </head>
   <body>
     <a-scene  physics="debug: false;
-                       gravity: -9.8;">
+                       gravity: -9.8;
+                       maxInterval: 0.02;
+                       iterations: 20;
+                       restitution: 0.1;">
       <!-- Assets -->
       <a-assets>
         <!-- Shapes -->
         <a-mixin  id="mWall"
+                  static-body
                   geometry="primitive: box;
                             height: 5;
                             width: 15;
                             depth: 1;"
-                  static-body
         ></a-mixin>
         <a-mixin  id="mBlock"
+                  chroma-block
+                  dynamic-body="mass: 20;"
                   geometry="primitive: box;
                             height: 0.9;
                             width: 0.9;
                             depth: 0.9;"
-                  dynamic-body="mass: 10;"
                   position="0 0.45 0"
         ></a-mixin>
         <a-mixin  id="mPad"
+                  static-body
                   geometry="primitive: cylinder;
                             height: 0.08;
                             radius: 0.8"
-                  static-body
                   position="0 0.04 0"
         ></a-mixin>
 
         <!-- Colours -->
         <a-mixin  id="mGreen"
                   class="chroma-colour"
-                  material="color: #2ecc71"
+                  material="color: #2ecc71;"
         ></a-mixin>
         <a-mixin  id="mYellow"
                   class="chroma-colour"
-                  material="color: #f1c40f"
+                  material="color: #f1c40f;"
         ></a-mixin>
         <a-mixin  id="mBlue"
                   class="chroma-colour"
-                  material="color: #9b59b6"
+                  material="color: #3498db;"
         ></a-mixin>
         <a-mixin  id="mPurple"
                   class="chroma-colour"
-                  material="color: #3498db"
+                  material="color: #8e44ad;"
         ></a-mixin>
         <a-mixin  id="mWhite"
                   class="chroma-colour"
-                  material="color: #ecf0f1"
+                  material="color: #ecf0f1;"
         ></a-mixin>
 
       </a-assets>
@@ -65,22 +70,45 @@
       <!-- Player -->
       <a-entity id="camera-rig"
                 movement-controls
-                kinematic-body="mass: 20;
+                kinematic-body="mass: 50;
                                 radius: 1;"
                 position="0 0 2"
       >
         <a-entity id="camera"
                   camera
-                  look-controls
+                  look-controls="pointerLockEnabled: true;"
                   position="0 1.6 0"
         >
           <a-entity id="cursor"
-                    cursor="fuse: false;
-                            rayOrigin: mouse;"
+                    static-body="shape: none;"
+                    shape__ring="shape: sphere;
+                                 radius: 0.02;"
+                    collision-filter="collisionForces: false;"
+                    cursor="fuse: false;"
                     raycaster="objects: .clickable;
-                               far: 2;"
+                               far: 0.9;"
+                    geometry="primitive: ring;
+                              radiusInner: 0.018;
+                              radiusOuter: 0.02;"
+                    material="color: white;
+                              shader: flat;"
                     position="0 0 -1"
-          ></a-entity>
+          >
+            <a-animation  attribute="scale"
+                          from="1 1 1"
+                          to="1.3 1.3 1.3"
+                          dur="250"
+                          begin="mouseenter"
+                          easing="ease-in-out-sine"
+            ></a-animation>
+            <a-animation  attribute="scale"
+                          from="1.3 1.3 1.3"
+                          to="1 1 1"
+                          dur="250"
+                          begin="mouseleave"
+                          easing="ease-in-out-sine"
+            ></a-animation>
+          </a-entity>
         </a-entity>
       </a-entity>
 
@@ -94,6 +122,17 @@
                           width: 16;
                           depth: 16;"
                 position="0 -0.05"
+      ></a-entity>
+      <!-- Roof -->
+      <a-entity id="floor"
+                class="chroma-wall"
+                static-body
+                mixin="mGreen"
+                geometry="primitive: box;
+                          height: 0.1;
+                          width: 16;
+                          depth: 16;"
+            position="0 5.05 0"
       ></a-entity>
 
       <!-- Walls -->
@@ -145,18 +184,22 @@
 
       <!-- Pads -->
       <a-entity id="pad-green"
+                class="chroma-pad"
                 mixin="mGreen mPad"
                 position="4 0.04 -2"
       ></a-entity>
       <a-entity id="pad-yellow"
+                class="chroma-pad"
                 mixin="mYellow mPad"
                 position="6 0.04 5"
       ></a-entity>
       <a-entity id="pad-blue"
+                class="chroma-pad"
                 mixin="mBlue mPad"
                 position="-5 0.04 -6"
       ></a-entity>
       <a-entity id="pad-purple"
+                class="chroma-pad"
                 mixin="mPurple mPad"
                 position="-5 0.04 4"
       ></a-entity>
@@ -202,7 +245,7 @@
       <!-- Lighting -->
       <a-light  type="ambient"
                 color="#bbb"
-                intensity="1.2"
+                intensity="1.4"
       ></a-light>
 
       <!-- Event Handler
@@ -213,40 +256,61 @@
     </a-scene>
     <!-- JavaScript Code -->
     <script>
-      let socket      = io();
-      let buttonA
+      let socket  = io();
+      let index = Math.floor(Math.random() * 4);
 
       //Objects
       let button  = document.querySelector('#button');
+      let cursor  = document.querySelector('#cursor');
       let walls   = document.querySelectorAll('.chroma-wall');
-      //console.log(walls);
+      let blocks  = document.querySelectorAll('.chroma-block');
+      //console.log(blocks);
 
       //Colours
       let colours = [document.querySelector('#mGreen').getAttribute('material').color, document.querySelector('#mYellow').getAttribute('material').color, document.querySelector('#mBlue').getAttribute('material').color, document.querySelector('#mPurple').getAttribute('material').color, document.querySelector('#mWhite').getAttribute('material').color];
       //console.log(colours);
-      let curCol  = colours[0];
-      let newCol  = colours[0];
+      let curCol  = colours[index];
+      let newCol  = colours[index];
 
+      //Set initial room colour
+      for (i = 0; i < walls.length; i++) {
+        walls[i].setAttribute('material', {color: colours[index]});
+      }
+
+      //C L I E N T   E V E N T S
+      //mousedown
       button.addEventListener('mousedown', function() {
         socket.emit('buttonApressed');
       });
+      //mouseup
+      button.addEventListener('mouseup', function() {
+        socket.emit('buttonAreleased');
+      });
+      //block + pad match
+      
 
+      //S E R V E R   E V E N T S
+      //colourshift (initiated by either client, roomA or roomB)
       socket.on('colourshift', function() {
+        //store current colour
         curCol = newCol;
-        let index = Math.floor(Math.random() * 4);
-            while (colours[index] === curCol){
-                index = Math.floor(Math.random() * 4);
-            }
+        //re-randomize index until colour at new random index is different than current colour
+        while (colours[index] === curCol){
+            index = Math.floor(Math.random() * 4);
+        }
+        //set new colour to verified colour index
         newCol = colours[index];
-        
+        //assign new colour to room
         for (i = 0; i < walls.length; i++) {
           walls[i].setAttribute('material', {color: newCol});
         }
       });
-
       socket.on('reveal', function() {
+        console.log('[Reveal Registered]');
+
+        curCol = colours[colours.length - 1];
         for (i = 0; i < walls.length; i++) {
-          walls[i].setAttribute('material', {color: colours[coloures.length - 1]});
+          walls[i].setAttribute('material', {color: colours[colours.length - 1]});
         }
       });
     </script>

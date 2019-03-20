@@ -3,23 +3,31 @@ AFRAME.registerComponent('chroma-block', {
     init : function() {
         Context_AF  = this;
 
-        Context_AF.scene    = document.querySelector('a-scene');
-        Context_AF.cursor   = document.querySelector('#cursor');
-
-        //On Click
-        Context_AF.el.addEventListener('click', function() {
-            console.log("[pressed]");
-            Context_AF.el.setAttribute('position', {x: 0, y: 0, z: -2});
-            Context_AF.el.flushToDOM();
-            Context_AF.cursor.appendChild(Context_AF.el);
+        //On Selection
+        Context_AF.el.addEventListener('mousedown', function() {
+            if (event.target.is('matched')) {
+                event.target.removeState('matched');
+                event.target.emit('matchremoved', event.target.id);
+            }
+            event.target.addState('selected');
+            event.target.setAttribute('constraint', {type: 'lock', target:'#cursor', collideConnected: false, });
         });
-        //Released
-        Context_AF.el.addEventListener('click', function(event) {
-            console.log("[mouse released]");
-            let tempPos = Context_AF.el.object3D.getWorldPosition();
-            Context_AF.el.setAttribute('position', {x: tempPos.x, y: tempPos.y, z: tempPos.z});
-            Context_AF.el.flushToDOM();
-            Context_AF.scene.appendChild(Context_AF.el);
+        //On Release
+        Context_AF.el.addEventListener('mouseup', function(event) {
+            event.target.removeState('selected');
+            event.target.removeAttribute('constraint');
+        });
+        //On Collision
+        Context_AF.el.addEventListener('collide', function(event) {
+            if (event.target.is('matched')) {
+                event.target.removeState('matched');
+                event.target.emit('matchremoved', event.target.id);
+            }
+            if (event.detail.body.el.className === 'chroma-pad' && event.detail.target.el.getAttribute('material').color === event.detail.body.el.getAttribute('material').color) {
+                console.log('[' + event.target.id + ' - Match Registerd]');
+                event.target.addState('matched');
+                event.target.emit('matchregistered', event.target.id);
+            }
         });
     },
 });
