@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Chromatose | Room B</title>
+    <title>Chromatose | Room A</title>
     <script src="js/aframe-v0.8.2.min.js"></script>
     <script src="js/aframe-extras.js"></script>
     <script src="js/aframe-physics-system.js"></script>
@@ -25,7 +25,11 @@
         <audio id="bgMusic"
                src="/assets/sounds/Root.mp3"
         ></audio>
-
+        <!-- Sound Effects sourced from: http://noproblo.dayjo.org/ZeldaSounds/ -->
+        <audio id="buttonPress"
+               src="assets/sounds/TP_Portals_On.wav"
+        ></audio>
+        
         <!-- Shapes -->
         <a-mixin  id="mWall"
                   static-body
@@ -71,6 +75,14 @@
       </a-assets>
       <!-- End of Assets -->
 
+       <!-- Background Music -->
+      <a-entity sound="src: #bgMusic;
+                       autoplay: true;
+                       loop: true;
+                       positional: false;
+                       volume: 0.2;"
+      ></a-entity>
+
       <!-- Player -->
       <a-entity id="camera-rig"
                 movement-controls
@@ -90,7 +102,7 @@
                     collision-filter="collisionForces: false;"
                     cursor="fuse: false;"
                     raycaster="objects: .clickable;
-                               far: 0.9;"
+                               far: 1;"
                     geometry="primitive: ring;
                               radiusInner: 0.018;
                               radiusOuter: 0.02;"
@@ -212,6 +224,11 @@
           <a-entity id="button"
                     class="clickable"
                     static-body
+                    sound="src: #buttonPress;
+                           autoplay: false;
+                           volume: 1;
+                           position: true;
+                           on: mousedown;"
                     geometry="primitive: cylinder;
                               radius: 0.1;
                               height: 0.1;"
@@ -279,6 +296,9 @@
                      document.querySelector('#mWhite').getAttribute('material').color];   //White
       let curCol  = colours[index];
       let newCol  = colours[index];
+
+      //Sounds
+      let matchSound = document.querySelector('#match-true');
 
       //Set initial room colour
       for (i = 0; i < walls.length; i++) {
