@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta http-equiv="Refresh" content="0; url=roomA.html"/>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            let socket  = io();
+
+            socket.on('connected', function(users) {
+                if (users === 1) {
+                    window.location.href = 'roomA.html';
+                } else if (users === 2) {
+                    window.location.href = 'roomB.html';
+                } else {
+                    window.location.href = 'queue.html';
+                }
+            });
+        </script>
     </head>
 </html>
