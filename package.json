@@ -20,5 +20,6 @@
   "dependencies": {
     "aframe-extras": "^6.0.0",
     "socketio": "^1.0.0"
-  }
+  },
+  "devDependencies": {}
 }
