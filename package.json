@@ -1,8 +1,13 @@
 {
   "name": "IMD3901_A3",
   "version": "1.0.0",
-  "description": "Repo for Assignment 3 - Multi-User Interactions",
+  "description": "Author: Matthew M. Donoghue, 100977476\r Date: March 21th, 2019\r Course: IMD3901B\r Assignment: 03 | Multi-User Interactions\r Title: Chromatose\r Instructor: Anthony Scavarelli",
   "main": "app.js",
+  "dependencies": {
+    "aframe-extras": "^6.0.0",
+    "socketio": "^1.0.0"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,10 +21,5 @@
   "bugs": {
     "url": "https://github.com/mattdono-CU/IMD3901_A3/issues"
   },
-  "homepage": "https://github.com/mattdono-CU/IMD3901_A3#readme",
-  "dependencies": {
-    "aframe-extras": "^6.0.0",
-    "socketio": "^1.0.0"
-  },
-  "devDependencies": {}
+  "homepage": "https://github.com/mattdono-CU/IMD3901_A3#readme"
 }

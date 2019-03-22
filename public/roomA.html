@@ -128,6 +128,7 @@
         </a-entity>
       </a-entity>
 
+      <!-- Room Geometry -->
       <!-- Ground -->
       <a-entity id="floor"
                 class="chroma-wall"
@@ -148,7 +149,6 @@
                           depth: 16;"
             position="0 5.05 0"
       ></a-entity>
-
       <!-- Walls -->
       <a-entity id="wall-back"
                 class="chroma-wall"
@@ -266,12 +266,6 @@
                 color="#bbb"
                 intensity="1.4"
       ></a-light>
-
-      <!-- Event Handler
-      <a-entity id="handler"
-                chromatose-manager
-      ></a-entity> -->
-
     </a-scene>
     <!--
     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -280,7 +274,6 @@
     -->
     <script>
       let socket  = io();
-      let index = Math.floor(Math.random() * 4);
 
       //Objects
       let button  = document.querySelector('#button');
@@ -294,8 +287,10 @@
                      document.querySelector('#mBlue').getAttribute('material').color,     //Blue
                      document.querySelector('#mPurple').getAttribute('material').color,   //Purple
                      document.querySelector('#mWhite').getAttribute('material').color];   //White
-      let curCol  = colours[index];
+      //radomize initial room colour
+      let index   = Math.floor(Math.random() * 4);
       let newCol  = colours[index];
+      let curCol  = colours[index];
 
       //Sounds
       let matchSound = document.querySelector('#match-true');
@@ -312,23 +307,23 @@
         blocks[i].addEventListener('stateadded', function(event) {
           if (event.detail === 'matched') {
             console.log(this.id + " is " + event.detail);
-            socket.emit('matchfound', "A", this.id);
+            socket.emit('matchfound', this.id);
           }
         });
         //match lost between block and corresponding pad
         blocks[i].addEventListener('stateremoved', function(event) {
           if (event.detail === 'matched') {
             console.log(this.id + " not " + event.detail);
-            socket.emit('matchlost', "A", this.id);
+            socket.emit('matchlost', this.id);
           }
         });
       }
 
-      //mousedown
+      //Colour Shift button pressed
       button.addEventListener('mousedown', function() {
         socket.emit('buttonpressed', "A");
       });
-      //mouseup
+      //Colour Shift button pressed
       button.addEventListener('mouseup', function() {
         socket.emit('buttonreleased', "A");
       });
@@ -338,17 +333,18 @@
       socket.on('colourshift', function() {
         //store current colour
         curCol = newCol;
-        //re-randomize index until colour at new random index is different than current colour
+        //re-randomize index until new colour at index is different than current colour
         while (colours[index] === curCol){
             index = Math.floor(Math.random() * 4);
         }
-        //set new colour to verified colour index
+        //set new colour equal to verified random colour index
         newCol = colours[index];
         //assign new colour to room
         for (i = 0; i < walls.length; i++) {
           walls[i].setAttribute('material', {color: newCol});
         }
       });
+      //When Colour Shift buttons in boths room are pressed, turn both rooms white
       socket.on('reveal', function() {
         console.log('[Reveal Registered]');
 
@@ -357,10 +353,11 @@
           walls[i].setAttribute('material', {color: colours[colours.length - 1]});
         }
       });
+      //Once a player has matched all the blocks in their room redirect winner & loser to appropriate pages
       socket.on('gameover', function(roomId) {
         if (roomId === 'A') {
           window.location.href = 'winner.html';
-        } else if (roomId === 'B') {
+        } else {
           window.location.href = 'loser.html';
         }
       });

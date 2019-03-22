@@ -4,13 +4,13 @@
         <script src="/socket.io/socket.io.js"></script>
         <script>
             let socket  = io();
-
-            socket.on('connected', function(users) {
-                if (users === 1) {
+            //redirect users to correct pages
+            socket.on('connected', function(redirectId) {
+                if (redirectId === 'A') {
                     window.location.href = 'roomA.html';
-                } else if (users === 2) {
+                } else if (redirectId === 'B') {
                     window.location.href = 'roomB.html';
-                } else {
+                } else if (redirectId === 'Queue') {
                     window.location.href = 'queue.html';
                 }
             });
