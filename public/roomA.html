@@ -79,7 +79,6 @@
       <a-entity sound="src: #bgMusic;
                        autoplay: true;
                        loop: true;
-                       positional: false;
                        volume: 0.2;"
       ></a-entity>
 
@@ -291,9 +290,6 @@
       let index   = Math.floor(Math.random() * 4);
       let newCol  = colours[index];
       let curCol  = colours[index];
-
-      //Sounds
-      let matchSound = document.querySelector('#match-true');
 
       //Set initial room colour
       for (i = 0; i < walls.length; i++) {

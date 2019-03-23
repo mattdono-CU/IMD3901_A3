@@ -47,7 +47,9 @@ server:port address and be automatically directed to either room A or room B dep
 you'll even be sent to a queue page if there are already two users connected (disclaimer: not a real queue, just a colourful web page).
 Ultimately, I was able to overcome the many unknown and unexpected challenges with using Socket.io for the first time by meticulously
 working through each step, outputting as much data as I possibly could, and trying to account for as many use-cases as I could within
-reason for this assignment.
+reason for this assignment. There is still an issue where the sound just doesn't play in the main game for an unknown reason that I was
+unable to solve, I am simply autoplaying background music and playing a sound when a button is pressed but they fail to load at random.
+Others were having the same issue so I am unsure if it's a probelm I can fix or if it's a browser issue.
 
 
 # W H A T  W E N T  W E L L
